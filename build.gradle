@@ -175,6 +175,11 @@ javadoc {
     options.overview = "src/main/java/overview.html"
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
 task dist << {
     ant.zip(destfile: "build/java-taxii.zip") {
         fileset(dir: ".", includes: "README.txt, LICENSE.txt")
