@@ -7,5 +7,5 @@
 /.settings
 /.nb-gradle/private/
 /private/
-/src/generated/schema
+/src/generated/
 /gradle.properties
