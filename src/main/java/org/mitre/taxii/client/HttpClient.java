@@ -114,6 +114,8 @@ public class HttpClient {
     public final static String HEADER_X_TAXII_PROTOCOL = "x-taxii-protocol";
     /** The X-TAXII-Services header name */
     public final static String HEADER_X_TAXII_SERVICES = "x-taxii-services";
+    /** An authentication header */
+    public final static String AUTHORIZATION_HEADER = "Authorization";
 
     /** <a href="http://hc.apache.org">Apache Commons HTTP Client</a> that handles connection management */
     private CloseableHttpClient httpClient;
@@ -201,7 +203,7 @@ public class HttpClient {
      * @throws IOException
      */
     public Object callTaxiiService(final URI uri, final Object message) throws JAXBException, UnsupportedEncodingException, IOException {
-    	return callTaxiiService(uri,message,null);
+    	return callTaxiiService(uri,message,null,null);
     }
     
     /**
@@ -218,6 +220,7 @@ public class HttpClient {
      * @param uri The address of the endpoint to send the message to
      * @param message The message to send.
      * @param context The context to send with the response (to allow preemptive authentication)
+     * @param authToken - an Authorization token if not null, gets added to the post header.
      * @return resultObj
      *              Either a TAXII response object of the same version as was passed in
      *              or "null" if parsing fails in a way that does not throw an exception.
@@ -225,7 +228,7 @@ public class HttpClient {
      * @throws UnsupportedEncodingException
      * @throws IOException
      */
-    public Object callTaxiiService(final URI uri, final Object message, HttpClientContext context) throws JAXBException, UnsupportedEncodingException, IOException {
+    public Object callTaxiiService(final URI uri, final Object message, HttpClientContext context, String authToken) throws JAXBException, UnsupportedEncodingException, IOException {
 
         // Figure out the version of the message.
         String msgPackage = message.getClass().getPackage().getName();
@@ -265,6 +268,11 @@ public class HttpClient {
             }
             postRequest.addHeader(HEADER_X_TAXII_CONTENT_TYPE, msgVersion);
             postRequest.addHeader(HEADER_X_TAXII_SERVICES, taxiiXml.getServiceVersion());
+            
+            // set authentication header (optional)
+            if (authToken != null && !authToken.isEmpty()) {
+            	postRequest.addHeader(AUTHORIZATION_HEADER, "Bearer "+authToken);
+            }
             
             // validate the scheme (HTTP or HTTPS)
             if (null == postRequest.getURI().getScheme()) {
